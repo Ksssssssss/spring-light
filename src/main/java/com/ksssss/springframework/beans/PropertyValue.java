@@ -1,6 +1,5 @@
 package com.ksssss.springframework.beans;
 
-import java.util.HashSet;
 import lombok.Data;
 
 /**
@@ -16,7 +15,6 @@ public class PropertyValue {
     private String value;
 
     public PropertyValue(String name, String value) {
-        HashSet<Object> objects = new HashSet<>();
         this.name = name;
         this.value = value;
     }

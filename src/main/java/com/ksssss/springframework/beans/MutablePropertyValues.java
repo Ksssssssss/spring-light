@@ -3,7 +3,6 @@ package com.ksssss.springframework.beans;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 

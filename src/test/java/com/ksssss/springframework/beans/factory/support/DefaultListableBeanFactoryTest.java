@@ -1,22 +1,16 @@
-# 更新记录
+package com.ksssss.springframework.beans.factory.support;
 
-## spring-light
+import static org.junit.jupiter.api.Assertions.*;
 
-> 分支 bean-definition
+import com.ksssss.springframework.beans.factory.config.BeanDefinition;
+import org.junit.jupiter.api.Test;
 
-主要改动
-
-- 新增BeanDefinition类(主要功能是保存bean信息)
-- 新增BeanDefinitionRegistry接口(定义对 BeanDefinition 的各种增删改操作)
-- 默认的ioc容器实现BeanDefinitionRegistry接口
-- ioc容器的基本实现
-
-![](./images/simple-bean-factory.png)
-
-Test代码
-
-```
+/**
+ * @author ksssss
+ * @date 2022/1/20 下午11:47
+ */
 public class DefaultListableBeanFactoryTest {
+
     @Test
     public void testDefaultListableBeanFactoryWithBeanDefinition() {
         DefaultListableBeanFactory defaultListableBeanFactory = new DefaultListableBeanFactory();
@@ -29,11 +23,10 @@ public class DefaultListableBeanFactoryTest {
     }
 }
 
-`class HelloBeanDefinition {
+class HelloBeanDefinition {
 
     public String sayHello() {
         System.out.println("Hello BeanDefinition");
         return "Hello BeanDefinition";
     }
 }
-```
