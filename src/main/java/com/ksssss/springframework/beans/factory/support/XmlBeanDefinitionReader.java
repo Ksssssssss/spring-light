@@ -3,18 +3,15 @@ package com.ksssss.springframework.beans.factory.support;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ksssss.springframework.beans.PropertyValue;
+import com.ksssss.springframework.beans.factory.BeanDefinitionStoreException;
 import com.ksssss.springframework.beans.factory.config.BeanDefinition;
 import com.ksssss.springframework.beans.factory.config.BeanDefinitionHolder;
 import com.ksssss.springframework.core.io.DefaultDocumentLoader;
 import com.ksssss.springframework.core.io.DocumentLoader;
 import com.ksssss.springframework.core.io.Resource;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.dom4j.Attribute;
-import org.dom4j.DocumentException;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -23,7 +20,6 @@ import org.dom4j.Node;
  * @author ksssss
  * @date 2022/1/24 下午11:56
  */
-@Slf4j
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
     public static final String BEAN_ELEMENT = "bean";
@@ -50,17 +46,17 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     }
 
     @Override
-    public int loadBeanDefinitions(Resource resource) {
+    public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
         try {
             Document document = documentLoader.loadDocument(resource);
+            int beforeCount = getRegistry().getBeanDefinitionCount();
             Element root = document.getRootElement();
             parseBeanDefinitions(root);
-        } catch (IOException e) {
-
-        } catch (DocumentException e) {
-
+            int count = getRegistry().getBeanDefinitionCount() - beforeCount;
+            return count;
+        } catch (Exception e) {
+            throw new BeanDefinitionStoreException("parsing XML document exception", e);
         }
-        return 0;
     }
 
     public void parseBeanDefinitions(Element root) {
@@ -69,7 +65,9 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
             if (node instanceof Element) {
                 Element ele = (Element) node;
                 if (ele.getName().equals(BEAN_ELEMENT)) {
-                    parseBeanDefinitionElement(ele);
+                    BeanDefinitionHolder beanDefinitionHolder = parseBeanDefinitionElement(ele);
+                    getRegistry().registerBeanDefinition(beanDefinitionHolder.getBeanName(),
+                            beanDefinitionHolder.getBeanDefinition());
                 }
             }
         }
@@ -77,7 +75,12 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
     public BeanDefinitionHolder parseBeanDefinitionElement(Element ele) {
         String id = ele.attributeValue(ID_ATTRIBUTE);
+        String nameAttr = ele.attributeValue(NAME_ATTRIBUTE);
         String beanName = id;
+        if (StrUtil.isEmpty(beanName)) {
+            beanName = nameAttr;
+        }
+
         String className = ele.attributeValue(CLASS_ATTRIBUTE).trim();
         BeanDefinition bd = createBeanDefinition(className);
         parseBeanDefinitionAttributes(bd, ele);

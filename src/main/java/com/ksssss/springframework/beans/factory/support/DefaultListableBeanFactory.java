@@ -35,4 +35,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         }
         this.beanDefinitionMap.put(beanName, beanDefinition);
     }
+
+    @Override
+    public int getBeanDefinitionCount() {
+        return this.beanDefinitionMap.size();
+    }
 }
