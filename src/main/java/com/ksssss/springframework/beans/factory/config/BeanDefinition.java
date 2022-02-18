@@ -17,6 +17,6 @@ public class BeanDefinition {
 
     private String scope;
     private Class clazz;
-    private MutablePropertyValues propertyValues;
+    private MutablePropertyValues propertyValues = new MutablePropertyValues();
 
 }

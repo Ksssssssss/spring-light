@@ -3,18 +3,18 @@ package com.ksssss.springframework.beans.factory.support;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ksssss.springframework.beans.PropertyValue;
+import com.ksssss.springframework.beans.factory.BeanDefinitionStoreException;
 import com.ksssss.springframework.beans.factory.config.BeanDefinition;
 import com.ksssss.springframework.beans.factory.config.BeanDefinitionHolder;
+import com.ksssss.springframework.beans.factory.config.RuntimeBeanReference;
 import com.ksssss.springframework.core.io.DefaultDocumentLoader;
 import com.ksssss.springframework.core.io.DocumentLoader;
 import com.ksssss.springframework.core.io.Resource;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.dom4j.Attribute;
-import org.dom4j.DocumentException;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -23,7 +23,6 @@ import org.dom4j.Node;
  * @author ksssss
  * @date 2022/1/24 下午11:56
  */
-@Slf4j
 public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 
     public static final String BEAN_ELEMENT = "bean";
@@ -33,6 +32,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     public static final String NAME_ATTRIBUTE = "name";
 
     public static final String VALUE_ATTRIBUTE = "value";
+
+    public static final String REF_ATTRIBUTE = "ref";
 
     public static final String PROPERTY_ELEMENT = "property";
 
@@ -50,34 +51,36 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
     }
 
     @Override
-    public int loadBeanDefinitions(Resource resource) {
+    public int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException {
         try {
             Document document = documentLoader.loadDocument(resource);
+            int beforeCount = getRegistry().getBeanDefinitionCount();
             Element root = document.getRootElement();
             parseBeanDefinitions(root);
-        } catch (IOException e) {
-
-        } catch (DocumentException e) {
-
+            int count = getRegistry().getBeanDefinitionCount() - beforeCount;
+            return count;
+        } catch (Exception e) {
+            throw new BeanDefinitionStoreException("parsing XML document exception", e);
         }
-        return 0;
     }
 
     public void parseBeanDefinitions(Element root) {
-        for (Iterator<Node> it = root.nodeIterator(); it.hasNext(); ) {
-            Node node = it.next();
-            if (node instanceof Element) {
-                Element ele = (Element) node;
-                if (ele.getName().equals(BEAN_ELEMENT)) {
-                    parseBeanDefinitionElement(ele);
-                }
-            }
+        List<Element> beanEles = root.elements(BEAN_ELEMENT);
+        for (Element ele : beanEles) {
+            BeanDefinitionHolder beanDefinitionHolder = parseBeanDefinitionElement(ele);
+            getRegistry().registerBeanDefinition(beanDefinitionHolder.getBeanName(),
+                    beanDefinitionHolder.getBeanDefinition());
         }
     }
 
     public BeanDefinitionHolder parseBeanDefinitionElement(Element ele) {
         String id = ele.attributeValue(ID_ATTRIBUTE);
+        String nameAttr = ele.attributeValue(NAME_ATTRIBUTE);
         String beanName = id;
+        if (StrUtil.isEmpty(beanName)) {
+            beanName = nameAttr;
+        }
+
         String className = ele.attributeValue(CLASS_ATTRIBUTE).trim();
         BeanDefinition bd = createBeanDefinition(className);
         parseBeanDefinitionAttributes(bd, ele);
@@ -106,9 +109,22 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
         List<Element> elements = ele.elements(PROPERTY_ELEMENT);
         for (Element property : elements) {
             String propertyName = property.attributeValue(NAME_ATTRIBUTE);
-            String propertyValue = property.attributeValue(VALUE_ATTRIBUTE);
-            PropertyValue pv = new PropertyValue(propertyName, propertyValue);
+            Object value = parsePropertyValue(property, propertyName);
+            PropertyValue pv = new PropertyValue(propertyName, value);
             bd.getPropertyValues().addPropertyValue(pv);
+        }
+    }
+
+    public Object parsePropertyValue(Element ele, String propertyName) {
+        Attribute refAttr = ele.attribute(REF_ATTRIBUTE);
+        Attribute valueAttr = ele.attribute(VALUE_ATTRIBUTE);
+        if (Objects.nonNull(refAttr)) {
+            RuntimeBeanReference ref = new RuntimeBeanReference(propertyName);
+            return ref;
+        } else if (Objects.nonNull(valueAttr)) {
+            return valueAttr.getValue();
+        } else {
+            return null;
         }
     }
 }

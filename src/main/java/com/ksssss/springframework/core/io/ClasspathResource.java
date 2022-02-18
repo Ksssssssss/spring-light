@@ -32,9 +32,9 @@ public class ClasspathResource extends AbstractResource {
     public InputStream getInputStream() throws IOException {
         InputStream is = null;
         if (this.clazz != null) {
-            is = this.clazz.getResourceAsStream(path);
+            is = this.clazz.getClassLoader().getResourceAsStream(path);
         } else {
-            is = this.getClass().getResourceAsStream(path);
+            is = this.getClass().getClassLoader().getResourceAsStream(path);
         }
         return is;
     }

@@ -12,6 +12,6 @@ public class XmlBeanFactory extends DefaultListableBeanFactory {
     private BeanDefinitionReader reader = new XmlBeanDefinitionReader(this);
 
     public XmlBeanFactory(Resource resource) throws BeansException {
-        int beanDefinitionCount = this.reader.loadBeanDefinitions(resource);
+        this.reader.loadBeanDefinitions(resource);
     }
 }

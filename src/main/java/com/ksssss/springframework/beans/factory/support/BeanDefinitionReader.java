@@ -1,5 +1,6 @@
 package com.ksssss.springframework.beans.factory.support;
 
+import com.ksssss.springframework.beans.factory.BeanDefinitionStoreException;
 import com.ksssss.springframework.beans.factory.config.BeanDefinition;
 import com.ksssss.springframework.core.io.Resource;
 
@@ -11,5 +12,5 @@ import com.ksssss.springframework.core.io.Resource;
  */
 public interface BeanDefinitionReader {
 
-    int loadBeanDefinitions(Resource resource);
+    int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException;
 }
