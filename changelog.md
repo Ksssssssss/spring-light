@@ -37,3 +37,29 @@ public class DefaultListableBeanFactoryTest {
     }
 }
 ```
+
+> 分支 bean-definition-parse
+
+主要改动
+
+- 新增InputStreamResource和Resource接口和其实现(对资源的获取和扩展)
+- 新增BeanDefinitionReader接口和实现(将Resource资源转换为BeanDefinition)
+- 新增DocumentLoader接口（将Resource资源转换为Document）
+- 新增抽象类AbstractBeanDefinitionReader默认实现BeanDefinitionReader接口并提供注册BeanDefinition
+
+![](images/bean-dfinition-reader.png)
+
+Test代码
+
+```
+public class XmlBeanFactoryTest {
+    @Test
+    public void testXmlBeanFactory() {
+        ClasspathResource resource = new ClasspathResource("hello.xml");
+        XmlBeanFactory xmlBeanFactory = new XmlBeanFactory(resource);
+        BeanDefinition bd = xmlBeanFactory.getBeanDefinition("person");
+        assertEquals(bd.getClazz(), Person.class);
+    }
+
+}
+```
