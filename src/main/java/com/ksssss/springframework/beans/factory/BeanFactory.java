@@ -10,5 +10,7 @@ import com.ksssss.springframework.beans.BeansException;
  */
 public interface BeanFactory {
 
-    Object getBean(String beanName) throws BeansException;
+    String FACTORY_BEAN_PREFIX = "&";
+
+    Object getBean(String name) throws BeansException;
 }
