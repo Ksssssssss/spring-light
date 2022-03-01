@@ -1,6 +1,5 @@
 package com.ksssss.springframework.beans.factory.support;
 
-import cn.hutool.core.text.CharPool;
 import cn.hutool.core.util.StrUtil;
 import com.ksssss.springframework.beans.BeansException;
 import com.ksssss.springframework.beans.factory.BeanCreationException;
@@ -25,7 +24,8 @@ public abstract class AbstractBeanFactory extends AbstractFactoryBeanSupport imp
             return getObjectForBeanInstance(singleton, name, beanName, null);
         }
         BeanDefinition beanDefinition = getBeanDefinition(beanName);
-        return createBean(beanName, beanDefinition);
+        singleton = createBean(beanName, beanDefinition);
+        return getObjectForBeanInstance(singleton, name, beanName, null);
     }
 
     protected Object getObjectForBeanInstance(Object beanInstance, String name, String beanName, BeanDefinition bd)
@@ -45,13 +45,13 @@ public abstract class AbstractBeanFactory extends AbstractFactoryBeanSupport imp
         if (object == null) {
             FactoryBean<?> factoryBean = (FactoryBean<?>) beanInstance;
             if (containsBeanDefinition(beanName)) {
-                object = getObjectFormBeanInstance(factoryBean, beanName);
+                object = getObjectFormFactoryBean(factoryBean, beanName);
             }
         }
         return object;
     }
 
-    protected Object getObjectFormBeanInstance(FactoryBean<?> factoryBean, String beanName)
+    protected Object getObjectFormFactoryBean(FactoryBean<?> factoryBean, String beanName)
             throws BeanCreationException {
         Object object;
         try {

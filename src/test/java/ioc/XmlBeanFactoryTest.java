@@ -1,14 +1,12 @@
 package ioc;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import beans.Person;
 import com.ksssss.springframework.beans.factory.config.BeanDefinition;
 import com.ksssss.springframework.beans.factory.support.XmlBeanFactory;
 import com.ksssss.springframework.core.io.ClasspathResource;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author ksssss
