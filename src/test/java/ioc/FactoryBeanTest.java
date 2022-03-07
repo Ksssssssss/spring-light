@@ -1,5 +1,9 @@
 package ioc;
 
+import beans.CarFactoryBean;
+import cn.hutool.core.convert.Convert;
+import cn.hutool.core.convert.Converter;
+import cn.hutool.core.util.ClassUtil;
 import com.ksssss.springframework.beans.factory.support.XmlBeanFactory;
 import com.ksssss.springframework.core.io.ClasspathResource;
 import org.junit.jupiter.api.Test;

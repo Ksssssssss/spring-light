@@ -18,7 +18,7 @@ public class CarFactoryBean implements FactoryBean<Car> {
         Car car = new Car();
         car.setBrand(infos[0]);
         car.setColor(infos[1]);
-        car.setBrand(infos[2]);
+        car.setPrice(Integer.parseInt(infos[2]));
         return car;
     }
 

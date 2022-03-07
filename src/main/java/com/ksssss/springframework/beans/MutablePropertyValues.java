@@ -62,4 +62,9 @@ public class MutablePropertyValues implements PropertyValues {
     public boolean contains(String propertyName) {
         return getPropertyValue(propertyName) != null;
     }
+
+    @Override
+    public boolean isEmpty() {
+        return this.propertyValues == null || this.propertyValues.isEmpty();
+    }
 }
