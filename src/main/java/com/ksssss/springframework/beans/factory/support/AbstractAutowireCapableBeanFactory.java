@@ -1,8 +1,5 @@
 package com.ksssss.springframework.beans.factory.support;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.convert.Converter;
-import cn.hutool.core.util.ReferenceUtil;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.TypeUtil;
@@ -10,13 +7,12 @@ import com.ksssss.springframework.beans.BeanWrapper;
 import com.ksssss.springframework.beans.BeansException;
 import com.ksssss.springframework.beans.MutablePropertyValues;
 import com.ksssss.springframework.beans.PropertyValue;
-import com.ksssss.springframework.beans.converter.Convert;
+import com.ksssss.springframework.beans.convert.ConversionService;
 import com.ksssss.springframework.beans.factory.BeanCreationException;
 import com.ksssss.springframework.beans.factory.config.BeanDefinition;
 import com.ksssss.springframework.beans.factory.config.RuntimeBeanReference;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author ksssss
@@ -82,7 +78,13 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
                     convertValue = getBean(name);
                 }
             } else {
-                convertValue = Convert.convert(value.getClass(),value);
+                ConversionService conversionService = getConversionService();
+                Class<?> sourceType = value.getClass();
+                Class<?> targetType = (Class<?>)TypeUtil.getFieldType(sourceType, name);
+
+                if (conversionService.canConvert(sourceType, targetType)) {
+                    convertValue = conversionService.convert(value, targetType);
+                }
             }
             Object wrappedInstance = bw.getWrappedInstance();
             ReflectUtil.setFieldValue(wrappedInstance, name, convertValue);

@@ -12,8 +12,8 @@ import lombok.Data;
 @Data
 public class BeanDefinition {
 
-    public static final String SCOPE_SINGLETON = "singleton";
-    public static final String SCOPE_PROTOTYPE = "prototype";
+    public static final String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
+    public static final String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
     private String scope;
     private Class clazz;

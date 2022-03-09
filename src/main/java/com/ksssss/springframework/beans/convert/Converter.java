@@ -1,6 +1,4 @@
-package com.ksssss.springframework.beans.converter;
-
-import java.lang.reflect.Type;
+package com.ksssss.springframework.beans.convert;
 
 /**
  * 类型转换器

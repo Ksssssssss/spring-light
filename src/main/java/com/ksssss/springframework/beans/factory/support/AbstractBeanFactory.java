@@ -2,11 +2,14 @@ package com.ksssss.springframework.beans.factory.support;
 
 import cn.hutool.core.util.StrUtil;
 import com.ksssss.springframework.beans.BeansException;
+import com.ksssss.springframework.beans.convert.ConversionService;
+import com.ksssss.springframework.beans.convert.ConverterRegister;
 import com.ksssss.springframework.beans.factory.BeanCreationException;
 import com.ksssss.springframework.beans.factory.BeanFactory;
 import com.ksssss.springframework.beans.factory.BeanIsNotFactoryBeanException;
 import com.ksssss.springframework.beans.factory.FactoryBean;
 import com.ksssss.springframework.beans.factory.config.BeanDefinition;
+import com.ksssss.springframework.beans.factory.config.ConfigurableBeanFactory;
 
 /**
  * 提供bean
@@ -14,7 +17,9 @@ import com.ksssss.springframework.beans.factory.config.BeanDefinition;
  * @author ksssss
  * @date 2022/1/13 下午1:39
  */
-public abstract class AbstractBeanFactory extends AbstractFactoryBeanSupport implements BeanFactory {
+public abstract class AbstractBeanFactory extends AbstractFactoryBeanSupport implements ConfigurableBeanFactory {
+
+    private ConversionService conversionService;
 
     @Override
     public Object getBean(String name) throws BeansException {
@@ -77,6 +82,16 @@ public abstract class AbstractBeanFactory extends AbstractFactoryBeanSupport imp
             beanName = StrUtil.removePrefix(name, FACTORY_BEAN_PREFIX);
         }
         return beanName;
+    }
+
+    @Override
+    public ConversionService getConversionService() {
+        return this.conversionService;
+    }
+
+    @Override
+    public void setConversionService(ConversionService conversionService) {
+        this.conversionService = conversionService;
     }
 
     protected abstract boolean containsBeanDefinition(String beanName);

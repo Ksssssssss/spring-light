@@ -1,6 +1,4 @@
-package com.ksssss.springframework.beans.converter;
-
-import com.ksssss.springframework.beans.converter.Converter;
+package com.ksssss.springframework.beans.convert;
 
 /**
  * @author ksssss

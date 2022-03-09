@@ -1,4 +1,4 @@
-package com.ksssss.springframework.beans.converter;
+package com.ksssss.springframework.beans.convert;
 
 /**
  * @author ksssss
