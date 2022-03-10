@@ -10,6 +10,8 @@ import com.ksssss.springframework.beans.PropertyValue;
 import com.ksssss.springframework.beans.convert.ConversionService;
 import com.ksssss.springframework.beans.factory.BeanCreationException;
 import com.ksssss.springframework.beans.factory.config.BeanDefinition;
+import com.ksssss.springframework.beans.factory.config.BeanPostProcessor;
+import com.ksssss.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import com.ksssss.springframework.beans.factory.config.RuntimeBeanReference;
 import java.util.Arrays;
 import java.util.List;
@@ -23,11 +25,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
     @Override
     public Object createBean(String beanName, BeanDefinition beanDefinition) throws BeansException {
+        Object bean = resolveBeforeInstantiation(beanName, beanDefinition);
+        if (bean != null) {
+            return bean;
+        }
         return doCreateBean(beanName, beanDefinition);
     }
 
     protected Object doCreateBean(String beanName, BeanDefinition beanDefinition) throws BeansException {
-
         BeanWrapper beanWrapper;
         beanWrapper = createBeanInstance(beanDefinition);
         final Object bean = beanWrapper != null ? beanWrapper.getWrappedInstance() : null;
@@ -80,7 +85,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             } else {
                 ConversionService conversionService = getConversionService();
                 Class<?> sourceType = value.getClass();
-                Class<?> targetType = (Class<?>)TypeUtil.getFieldType(sourceType, name);
+                Class<?> targetType = (Class<?>) TypeUtil.getFieldType(sourceType, name);
 
                 if (conversionService.canConvert(sourceType, targetType)) {
                     convertValue = conversionService.convert(value, targetType);
@@ -89,5 +94,40 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             Object wrappedInstance = bw.getWrappedInstance();
             ReflectUtil.setFieldValue(wrappedInstance, name, convertValue);
         }
+    }
+
+    protected Object resolveBeforeInstantiation(String beanName, BeanDefinition bd) {
+        Object bean = applyBeanPostProcessorBeforeInstantiation(beanName, bd);
+        if (bean != null) {
+            bean = applyBeanPostProcessorAfterInitialization(bean, beanName);
+        }
+        return bean;
+    }
+
+    protected Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) {
+        Object result = existingBean;
+        List<BeanPostProcessor> beanPostProcessors = getBeanPostProcessors();
+        for (BeanPostProcessor bp : beanPostProcessors) {
+            Object currentBean = bp.postProcessorAfterInitialization(existingBean, beanName);
+            if (currentBean == null) {
+                return result;
+            }
+            result = currentBean;
+        }
+        return result;
+    }
+
+    protected Object applyBeanPostProcessorBeforeInstantiation(String beanName, BeanDefinition bd) {
+        List<BeanPostProcessor> beanPostProcessors = getBeanPostProcessors();
+        for (BeanPostProcessor bp : beanPostProcessors) {
+            if (bp instanceof InstantiationAwareBeanPostProcessor) {
+                InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+                Object bean = ibp.postProcessorBeforeInstantiation(bd.getClazz(), beanName);
+                if (bean != null) {
+                    return bean;
+                }
+            }
+        }
+        return null;
     }
 }

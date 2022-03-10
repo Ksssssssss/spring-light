@@ -1,5 +1,6 @@
 package com.ksssss.springframework.beans.factory.support;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import com.ksssss.springframework.beans.BeansException;
 import com.ksssss.springframework.beans.convert.ConversionService;
@@ -9,7 +10,10 @@ import com.ksssss.springframework.beans.factory.BeanFactory;
 import com.ksssss.springframework.beans.factory.BeanIsNotFactoryBeanException;
 import com.ksssss.springframework.beans.factory.FactoryBean;
 import com.ksssss.springframework.beans.factory.config.BeanDefinition;
+import com.ksssss.springframework.beans.factory.config.BeanPostProcessor;
 import com.ksssss.springframework.beans.factory.config.ConfigurableBeanFactory;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 提供bean
@@ -20,6 +24,7 @@ import com.ksssss.springframework.beans.factory.config.ConfigurableBeanFactory;
 public abstract class AbstractBeanFactory extends AbstractFactoryBeanSupport implements ConfigurableBeanFactory {
 
     private ConversionService conversionService;
+    private List<BeanPostProcessor> beanPostProcessors = new CopyOnWriteArrayList<>();
 
     @Override
     public Object getBean(String name) throws BeansException {
@@ -92,6 +97,17 @@ public abstract class AbstractBeanFactory extends AbstractFactoryBeanSupport imp
     @Override
     public void setConversionService(ConversionService conversionService) {
         this.conversionService = conversionService;
+    }
+
+    @Override
+    public List<BeanPostProcessor> getBeanPostProcessors() {
+        return this.beanPostProcessors;
+    }
+
+    @Override
+    public void addBeanPostProcessor(BeanPostProcessor beanPostProcessor) {
+        Assert.notNull(beanPostProcessor);
+        this.beanPostProcessors.add(beanPostProcessor);
     }
 
     protected abstract boolean containsBeanDefinition(String beanName);

@@ -5,6 +5,7 @@ import com.ksssss.springframework.beans.convert.ConversionService;
 import com.ksssss.springframework.beans.convert.ConverterRegister;
 import com.ksssss.springframework.beans.factory.BeanFactory;
 import com.ksssss.springframework.beans.factory.support.SingletonBeanRegistry;
+import java.util.List;
 
 /**
  * factory配置
@@ -20,4 +21,8 @@ public interface ConfigurableBeanFactory extends BeanFactory, SingletonBeanRegis
     ConversionService getConversionService();
 
     void setConversionService(ConversionService conversionService);
+
+    List<BeanPostProcessor> getBeanPostProcessors();
+
+    void addBeanPostProcessor(BeanPostProcessor beanPostProcessor);
 }
