@@ -29,7 +29,7 @@ public abstract class AbstractBeanFactory extends AbstractFactoryBeanSupport imp
             return getObjectForBeanInstance(singleton, name, beanName, null);
         }
         BeanDefinition beanDefinition = getBeanDefinition(beanName);
-        singleton = createBean(beanName, beanDefinition);
+        singleton = getSingleton(beanName, () -> createBean(beanName, beanDefinition));
         return getObjectForBeanInstance(singleton, name, beanName, null);
     }
 

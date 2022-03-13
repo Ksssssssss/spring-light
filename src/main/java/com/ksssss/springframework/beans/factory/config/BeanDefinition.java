@@ -19,4 +19,8 @@ public class BeanDefinition {
     private Class clazz;
     private MutablePropertyValues propertyValues = new MutablePropertyValues();
 
+    public boolean isSingleton(){
+        return SCOPE_SINGLETON.equals(scope);
+    }
+
 }
