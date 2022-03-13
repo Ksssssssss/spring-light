@@ -21,19 +21,24 @@ import java.util.List;
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements
         AutowireCapableBeanFactory {
 
+    private boolean allowCircularReference = true;
+
     @Override
     public Object createBean(String beanName, BeanDefinition beanDefinition) throws BeansException {
         return doCreateBean(beanName, beanDefinition);
     }
 
-    protected Object doCreateBean(String beanName, BeanDefinition beanDefinition) throws BeansException {
+    protected Object doCreateBean(String beanName, BeanDefinition bd) throws BeansException {
 
         BeanWrapper beanWrapper;
-        beanWrapper = createBeanInstance(beanDefinition);
+        beanWrapper = createBeanInstance(bd);
         final Object bean = beanWrapper != null ? beanWrapper.getWrappedInstance() : null;
-
-        populateBean(beanName, beanDefinition, beanWrapper);
-        registerSingleton(beanName, bean);
+        boolean earlySingletonExposure =
+                bd.isSingleton() && allowCircularReference && isSingletonCurrentlyInCreation(beanName);
+        if (earlySingletonExposure) {
+            addSingletonFactory(beanName, () -> bean);
+        }
+        populateBean(beanName, bd, beanWrapper);
         return bean;
     }
 
@@ -80,7 +85,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             } else {
                 ConversionService conversionService = getConversionService();
                 Class<?> sourceType = value.getClass();
-                Class<?> targetType = (Class<?>)TypeUtil.getFieldType(sourceType, name);
+                Class<?> targetType = (Class<?>) TypeUtil.getFieldType(sourceType, name);
 
                 if (conversionService.canConvert(sourceType, targetType)) {
                     convertValue = conversionService.convert(value, targetType);
@@ -89,5 +94,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             Object wrappedInstance = bw.getWrappedInstance();
             ReflectUtil.setFieldValue(wrappedInstance, name, convertValue);
         }
+    }
+
+    public void setAllowCircularReference(boolean allowCircularReference) {
+        this.allowCircularReference = allowCircularReference;
     }
 }
