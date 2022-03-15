@@ -15,8 +15,12 @@ public class BeanDefinition {
     public static final String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
     public static final String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
-    private String scope;
+    private String scope = SCOPE_SINGLETON;
     private Class clazz;
     private MutablePropertyValues propertyValues = new MutablePropertyValues();
+
+    public boolean isSingleton(){
+        return SCOPE_SINGLETON.equals(scope);
+    }
 
 }

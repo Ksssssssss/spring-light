@@ -10,8 +10,6 @@ import com.ksssss.springframework.beans.PropertyValue;
 import com.ksssss.springframework.beans.convert.ConversionService;
 import com.ksssss.springframework.beans.factory.BeanCreationException;
 import com.ksssss.springframework.beans.factory.config.BeanDefinition;
-import com.ksssss.springframework.beans.factory.config.BeanPostProcessor;
-import com.ksssss.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import com.ksssss.springframework.beans.factory.config.RuntimeBeanReference;
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +21,8 @@ import java.util.List;
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements
         AutowireCapableBeanFactory {
 
+    private boolean allowCircularReference = true;
+
     @Override
     public Object createBean(String beanName, BeanDefinition beanDefinition) throws BeansException {
         Object bean = resolveBeforeInstantiation(beanName, beanDefinition);
@@ -32,13 +32,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         return doCreateBean(beanName, beanDefinition);
     }
 
-    protected Object doCreateBean(String beanName, BeanDefinition beanDefinition) throws BeansException {
-        BeanWrapper beanWrapper;
-        beanWrapper = createBeanInstance(beanDefinition);
-        final Object bean = beanWrapper != null ? beanWrapper.getWrappedInstance() : null;
+    protected Object doCreateBean(String beanName, BeanDefinition bd) throws BeansException {
 
-        populateBean(beanName, beanDefinition, beanWrapper);
-        registerSingleton(beanName, bean);
+        BeanWrapper beanWrapper;
+        beanWrapper = createBeanInstance(bd);
+        final Object bean = beanWrapper != null ? beanWrapper.getWrappedInstance() : null;
+        boolean earlySingletonExposure =
+                bd.isSingleton() && allowCircularReference && isSingletonCurrentlyInCreation(beanName);
+        if (earlySingletonExposure) {
+            addSingletonFactory(beanName, () -> bean);
+        }
+        populateBean(beanName, bd, beanWrapper);
         return bean;
     }
 
@@ -94,6 +98,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             Object wrappedInstance = bw.getWrappedInstance();
             ReflectUtil.setFieldValue(wrappedInstance, name, convertValue);
         }
+    }
+
+    public void setAllowCircularReference(boolean allowCircularReference) {
+        this.allowCircularReference = allowCircularReference;
     }
 
     protected Object resolveBeforeInstantiation(String beanName, BeanDefinition bd) {

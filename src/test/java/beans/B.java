@@ -6,16 +6,14 @@ import lombok.Data;
  * @author ksssss
  * @date 2022/3/7 下午1:09
  */
-@Data
 public class B {
+    private A a;
 
-    private String info;
-
-    public String getInfo() {
-        return info;
+    public A getA() {
+        return a;
     }
 
-    public void setInfo(String info) {
-        this.info = info;
+    public void setA(A a) {
+        this.a = a;
     }
 }

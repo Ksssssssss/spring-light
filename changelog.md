@@ -78,4 +78,13 @@ public class XmlBeanFactoryTest {
         * 获取普通bean或FactoryBean实例
         * 获取FactoryBean的getObject实例
         * 从getObjectFromFactoryBean中获取
-    
+
+
+> 分支 circular-dependency
+
+主要改动
+
+- 新增字段singletonFactorys(三级缓存，提前暴露获取bean的ObjectFactory)
+- 新增字段earlySingletonObjects(二级缓存,通过三级缓存的ObjectFactory的getObject()方法获取bean的引用)
+- 新增字段singletonsCurrentlyInCreation(判断当前bean是否在创建中，在创建bean的前后添加移除)
+- 修改getSingleton方法,应用三级缓存

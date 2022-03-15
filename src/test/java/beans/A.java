@@ -9,7 +9,6 @@ import lombok.Data;
 public class A {
 
     private B b;
-    private String info;
 
     public B getB() {
         return b;
@@ -17,13 +16,5 @@ public class A {
 
     public void setB(B b) {
         this.b = b;
-    }
-
-    public String getInfo() {
-        return info;
-    }
-
-    public void setInfo(String info) {
-        this.info = info;
     }
 }
