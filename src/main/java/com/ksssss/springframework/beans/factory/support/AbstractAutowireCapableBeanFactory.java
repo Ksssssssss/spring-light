@@ -10,6 +10,8 @@ import com.ksssss.springframework.beans.PropertyValue;
 import com.ksssss.springframework.beans.convert.ConversionService;
 import com.ksssss.springframework.beans.factory.BeanCreationException;
 import com.ksssss.springframework.beans.factory.config.BeanDefinition;
+import com.ksssss.springframework.beans.factory.config.BeanPostProcessor;
+import com.ksssss.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import com.ksssss.springframework.beans.factory.config.RuntimeBeanReference;
 import java.util.Arrays;
 import java.util.List;
