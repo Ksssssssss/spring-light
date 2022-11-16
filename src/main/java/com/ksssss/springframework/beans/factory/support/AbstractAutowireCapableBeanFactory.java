@@ -3,12 +3,17 @@ package com.ksssss.springframework.beans.factory.support;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.TypeUtil;
+import com.ksssss.springframework.InitializingBean;
 import com.ksssss.springframework.beans.BeanWrapper;
 import com.ksssss.springframework.beans.BeansException;
 import com.ksssss.springframework.beans.MutablePropertyValues;
 import com.ksssss.springframework.beans.PropertyValue;
 import com.ksssss.springframework.beans.convert.ConversionService;
+import com.ksssss.springframework.beans.factory.Aware;
 import com.ksssss.springframework.beans.factory.BeanCreationException;
+import com.ksssss.springframework.beans.factory.BeanFactory;
+import com.ksssss.springframework.beans.factory.BeanFactoryAware;
+import com.ksssss.springframework.beans.factory.BeanNameAware;
 import com.ksssss.springframework.beans.factory.config.BeanDefinition;
 import com.ksssss.springframework.beans.factory.config.BeanPostProcessor;
 import com.ksssss.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
@@ -44,8 +49,25 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         if (earlySingletonExposure) {
             addSingletonFactory(beanName, () -> bean);
         }
+        Object exposedObject = bean;
         populateBean(beanName, bd, beanWrapper);
-        return bean;
+        exposedObject = initializeBean(beanName, bd, bean);
+        return exposedObject;
+    }
+
+    protected Object initializeBean(final String beanName, final BeanDefinition bd, final Object bean) {
+        invokeAwareMethod(beanName, bean);
+        Object wapperBean = bean;
+        if (wapperBean != null) {
+            wapperBean = applyBeanPostProcessorAfterInitialization(wapperBean, beanName);
+        }
+        try {
+            invokeInitMethod(bd, wapperBean);
+        } catch (Exception e) {
+            throw new BeanCreationException(StrUtil.format("Bean:{} initMethod发生异常", beanName), e);
+        }
+        applyBeanPostProcessorAfterInitialization(wapperBean, beanName);
+        return wapperBean;
     }
 
     protected BeanWrapper createBeanInstance(BeanDefinition beanDefinition) {
@@ -114,6 +136,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         return bean;
     }
 
+    protected Object applyBeanPostProcessorBeforeInitialization(Object existingBean, String beanName) {
+        Object result = existingBean;
+        List<BeanPostProcessor> beanPostProcessors = getBeanPostProcessors();
+        for (BeanPostProcessor bp : beanPostProcessors) {
+            Object currentBean = bp.postProcessorBeforeInitialization(existingBean, beanName);
+            if (currentBean == null) {
+                return result;
+            }
+            result = currentBean;
+        }
+        return result;
+    }
+
     protected Object applyBeanPostProcessorAfterInitialization(Object existingBean, String beanName) {
         Object result = existingBean;
         List<BeanPostProcessor> beanPostProcessors = getBeanPostProcessors();
@@ -139,5 +174,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             }
         }
         return null;
+    }
+
+    private void invokeAwareMethod(final String beanName, final Object bean) {
+        if (bean instanceof Aware) {
+            if (bean instanceof BeanNameAware) {
+                ((BeanNameAware) bean).setBeanName(beanName);
+            } else if (bean instanceof BeanFactoryAware) {
+                ((BeanFactoryAware) bean).setBeanFactory(AbstractAutowireCapableBeanFactory.this);
+            }
+        }
+    }
+
+    private void invokeInitMethod(final BeanDefinition bd, final Object bean) throws Exception {
+        boolean isInitializingBean = bean instanceof InitializingBean;
+        if (isInitializingBean && bd != null) {
+            ((InitializingBean) bean).afterPropertiesSet();
+        }
     }
 }
